@@ -1,0 +1,88 @@
+package hw6;
+
+import java.io.IOException;
+import java.util.Scanner;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+
+
+
+public class Hashing1 {
+
+	@SuppressWarnings("serial")
+	static class BadInputException extends Exception {
+	    BadInputException() {
+	    }
+	}
+	public static void main(String[] args) throws IOException {
+		Scanner scan = null;
+		int UserSelection = 0;
+		int size = 0;
+		boolean status = true;
+		try {
+			scan = new Scanner(System.in);
+			while (status) {
+				try {
+					System.out.println("Please enter the size of the array (100 or 200)");
+					UserSelection = scan.nextInt();
+					if (UserSelection == 100 || UserSelection == 200) {
+						size = UserSelection;
+						status = false;
+					} else {
+						throw new BadInputException();
+					}
+				}catch (BadInputException e) {
+					System.out.println("Invalid Input! Please enter 100 or 200!");
+				}catch (Exception e) {
+					System.out.println("Invalid Input! Please enter 100 or 200!");
+				}
+			}
+			File file = new File("/Users/qiankejin/Desktop/MSiA/MSiA422/HW6/input.txt");
+			String[] hash = new String[size];
+			for (int i = 0; i < size; i++) {
+				hash[i] = Integer.toString(i + 1) + ": ";
+			}
+			try (Scanner scanner = new Scanner(file)) {
+				while (scanner.hasNextLine()) {
+					int sum = 0;
+					String line = scanner.nextLine();
+					for (int i = 0; i < line.length(); i++) {
+						char c = line.charAt(i);
+						sum += (int) c;
+					}
+					Integer hashValue = sum % size;
+					if (hashValue > 0) {
+						hash[hashValue - 1] += line + ", ";
+					} else if (hashValue == 0) {
+						hash[size - 1] += line + ", ";
+					} else {
+						hash[hashValue + size - 1] += line + ", ";
+					}
+				}
+
+				metric m = new metric(hash, size);
+				System.out.println(m.getVar());
+
+				String output = "output1.txt";
+				BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(output));
+				for (int i = 0; i < size; i++) {
+					String[] temp = hash[i].split(" ");
+					if (temp.length == 1) {
+						hash[i] += "EMPTY LINE...\n\n";
+					} else {
+						hash[i] = hash[i].substring(0, hash[i].length() - 2) + "\n\n";
+					}
+					if (i == size - 1) {
+						hash[i] = hash[i].trim();
+					}
+					bufferedWriter.write(hash[i]);
+				}
+				bufferedWriter.close();
+			}
+
+		} finally {
+			scan.close();
+		}
+	}
+}

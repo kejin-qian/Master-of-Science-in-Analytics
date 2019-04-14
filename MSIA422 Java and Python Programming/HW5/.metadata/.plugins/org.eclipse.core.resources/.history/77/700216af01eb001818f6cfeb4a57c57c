@@ -1,0 +1,30 @@
+package HW5;
+
+public class OneTimeAppointment extends Appointment {
+		// Private member variables
+		// date is in the format of MM/DD/YYYY
+	    private String date;
+	    
+	    // Constructor
+	    public OneTimeAppointment(String Description, String date) {
+	    	super(Description);
+	    	this.date = date;
+	    }
+	    
+	    @Override
+	    public String toString() {
+	    	return date + " -" + " One Time " + super.toString();
+	    }
+	    
+	    // Override the inherited occursOn() to provide the proper implementation
+	    @Override
+	    public boolean occursOn(int year, int month, int day) {
+	    	String[] array1= date.split("/");
+	    	if (Integer.parseInt(array1[0]) == year && 
+	    			Integer.parseInt(array1[1]) == month &&
+	    					Integer.parseInt(array1[2]) == day) {
+	    		return true;
+	    	} else {
+	    		return false;}
+	    	}
+	    }

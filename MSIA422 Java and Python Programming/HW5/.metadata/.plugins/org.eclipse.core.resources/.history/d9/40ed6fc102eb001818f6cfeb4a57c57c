@@ -1,0 +1,15 @@
+package HW5;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class trytry {
+
+	public static void main(String[] args) throws ParseException {
+		// TODO Auto-generated method stub
+		Date aptdate = new SimpleDateFormat("MM/dd/yyyy").parse("1/1/2018");
+        System.out.println(aptdate);
+	}
+
+}

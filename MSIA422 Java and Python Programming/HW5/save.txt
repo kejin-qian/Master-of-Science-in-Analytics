@@ -1,0 +1,5 @@
+01/01/2000 - One Time - One Time Appointment with Jane
+12/20/1999 to 01/18/2000 - Daily - Daily Appointment with Joe
+01/10/1998 to 01/5/2003 - Monthly - Monthly Appointment with Cindy
+01/01/2000 to 01/11/2002 - Monthly - Monthly Appointment with Laura
+03/18/1998 to 07/28/2000 - Daily - Daily Appointment with Cathy

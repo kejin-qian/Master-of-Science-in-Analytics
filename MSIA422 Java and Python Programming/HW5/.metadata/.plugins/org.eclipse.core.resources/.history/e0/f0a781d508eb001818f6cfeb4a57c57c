@@ -1,0 +1,37 @@
+package HW5;
+
+public class DailyAppointment extends Appointment{
+	    // Private member variables
+		// date is in the format of MM/DD/YYYY
+		private String startdate;
+		private String enddate;
+		
+		    
+		// Constructor
+		public DailyAppointment(String Description, String startdate, String enddate) {
+		    super(Description);
+		    this.startdate = startdate;
+		    this.enddate = enddate;
+		    }
+		    
+		    @Override
+		    public String toString() {
+		    	return  startdate + " to " + enddate
+		    			+ " -" + " Daily " + super.toString();
+		    }
+		    
+		    // Override the inherited occursOn() to provide the proper implementation
+		    @Override
+		    public boolean occursOn(int year, int month, int day) {
+		    	String[] array1= date.split("/");
+		    	if (Integer.parseInt(array1[0]) == year && 
+		    			Integer.parseInt(array1[1]) == month &&
+		    					Integer.parseInt(array1[2]) == day) {
+		    		return true;
+		    	} else {
+		    		return false;}
+		    	}
+		    }
+
+
+}

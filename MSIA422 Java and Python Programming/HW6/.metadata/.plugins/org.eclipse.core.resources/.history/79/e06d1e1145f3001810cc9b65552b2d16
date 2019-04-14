@@ -1,0 +1,64 @@
+package hw6;
+
+import java.io.IOException;
+import java.util.Scanner;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
+
+public class comparator {
+
+	@SuppressWarnings("serial")
+	static class BadInputException extends Exception {
+		BadInputException() {
+		}
+	}
+	public static void main(String[] args) throws IOException {
+		// TODO Auto-generated method stub
+		Scanner scan = null;
+		int UserSelection = 0;
+		int size = 0;
+		boolean status = true;
+		try {
+			scan = new Scanner(System.in);
+			while (status) {
+				try {
+					System.out.println("Please enter the size of the array (100 or 200)");
+					UserSelection = scan.nextInt();
+					if (UserSelection == 100 || UserSelection == 200) {
+						size = UserSelection;
+						status = false;
+					} else {
+						throw new BadInputException();
+					}
+				} catch (BadInputException e) {
+					System.out.println("Invalid Input! Please enter 100 or 200!");
+				} catch (Exception e) {
+					System.out.println("Invalid Input! Please enter 100 or 200!");
+					scan.next();
+				}
+			}
+		} finally {
+			scan.close();
+
+		}
+		String[] VarList = new String[3];
+		VarList[0] = "Variance of Hashing Method1 (ASCII) with size = " + size + " : ";
+		VarList[1] = "Variance of Hashing Method2 (HashCode) with size = " + size + " : ";
+	    VarList[2] = "Variance of Hashing Method3 (Exponential) with size = " + size + " : ";
+		
+	    double var1 = Hashing1.hashing(size);
+	    VarList[0] += Double.toString(var1);
+	    double var2 = Hashing2.hashing(size);
+	    VarList[1] += Double.toString(var2);
+	    
+	    BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("Variance_Comparison.txt"));
+	    for (int i = 0; i < VarList.length; i++) {
+	        bufferedWriter.write(VarList[i]+"\n"); //write the names line by line
+	    }
+	    bufferedWriter.close();
+	    
+	    
+
+	}
+}

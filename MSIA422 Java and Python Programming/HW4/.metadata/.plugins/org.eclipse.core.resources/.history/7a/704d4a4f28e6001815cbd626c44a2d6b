@@ -1,0 +1,61 @@
+package hw4;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+
+public class DataAnalysis {
+	public static void main(String[] args) throws IOException, ParseException {
+
+
+        File file = new File("/Users/qiankejin/Desktop/HW4/employees.txt");
+        List<String> name = new ArrayList<>();
+        List<Double> age = new ArrayList<>();
+        List<Integer> salary = new ArrayList<>();
+        Date today = new Date();
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String[] line = scanner.nextLine().split(",");
+                name.add(line[0]);
+                Date bdate = new SimpleDateFormat("dd/MM/yyyy").parse(line[1]);
+                long diffInMillies = Math.abs(bdate.getTime() - today.getTime());
+                long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                age.add(diff/365.0);
+                salary.add(Integer.parseInt(line[2]));
+            }
+        }
+
+        // 1. How many Employees exist in the file?
+		System.out.println("There are " + name.size() + " employees in the file");
+		// 2. Who has the highest salary?
+		System.out.println(name.get(salary.indexOf(Max(salary))) + " has the highest salary");
+		// 3. What is the average salary?
+		int sum = salary.stream().mapToInt(Integer::intValue).sum();
+		double avg = sum/salary.size();
+		System.out.println("The average salary is " + avg);
+		// 4. How many employees make above the average?
+		int count = 0;
+		for(int i=1;i < salary.size();i++) {
+			if(salary.get(i) > avg) {
+				count = count + 1;
+			}
+		System.out.println("There are " + count + " employees make salares above the average.");
+			
+		}
+	}
+    public static Integer Max(List<Integer> salary){
+	    Integer max = salary.get(0);
+	    for(int i=1;i < salary.size();i++){
+		    if(salary.get(i) > max){
+			  max = salary.get(i);
+			}
+	  }
+	  return max;
+	}
+}

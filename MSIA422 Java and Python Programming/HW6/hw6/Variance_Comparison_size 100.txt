@@ -1,0 +1,3 @@
+Variance of Hashing Method1 (ASCII) with size = 100 : 5.88
+Variance of Hashing Method2 (HashCode) with size = 100 : 1.92
+Variance of Hashing Method3 (Exponential) with size = 100 : 1.66

@@ -1,0 +1,272 @@
+package project2;
+
+
+
+import java.util.*;
+
+public class MyDataFrame {
+
+    private List<List<Comparable>> data = new ArrayList<List<Comparable>>();
+    private List<String > header = new ArrayList<>();
+    private HashMap<String, Integer> map = new HashMap<>();
+    private Integer[] shape = new Integer[2];
+    
+
+    public MyDataFrame(List<List<Comparable>> input_data, List<String> input_header) {
+        this.data = input_data;
+        this.header = input_header;
+        this.shape[0] = input_data.get(0).size();
+        this.shape[1] = input_data.size();
+        this.map = new HashMap<>();
+        for (int i = 0; i < input_header.size(); i++) {
+            map.put((String) input_header.get(i), i);
+        }
+    }
+
+    public void print() {
+        System.out.println(this.header);
+        System.out.println("----------------------------------");
+        for (int i = 0; i < this.shape[0]; i++) {
+            String row = "";
+            for (int j = 0; j < this.shape[1]; j++) {
+                row += this.data.get(j).get(i) + ",";
+            }
+            System.out.println(row.substring(0, row.length() - 1));
+        }
+        System.out.println("----------------------------------");
+    }
+
+//    public MyDataFrame(List data, List header, HashMap map) {
+//        this.data = data;
+//        this.header = header;
+//        this.map = map;
+//    }
+
+    public Comparable getCell(int i, int j) {
+        return this.data.get(j).get(i);
+    }
+
+    public Comparable getCell(int i, String col) {
+        return this.data.get(this.map.get(col)).get(i);
+    }
+//
+
+    public Integer[] getShape() {
+        return this.shape;
+    }
+
+    public List<List<Comparable>> getData() {
+        return this.data;
+    }
+//
+    public List<String> getHeader() {
+        return header;
+    }
+//
+//    public HashMap<String, Integer> getMap() {
+//        return map;
+//    }
+
+    public MyDataFrame head(int n) {
+        List<List<Comparable>> newData = new ArrayList<>();
+        for (int j = 0; j < this.shape[1]; j++) {
+            newData.add(this.data.get(j).subList(0, Math.min(n, this.shape[0])));
+        }
+        return new MyDataFrame(newData, this.header);
+    }
+
+    public MyDataFrame tail(int n) {
+        List<List<Comparable>> newData = new ArrayList<>();
+        for (int j = 0; j < this.shape[1]; j++) {
+            newData.add(this.data.get(j).subList(Math.max(0, this.shape[0] - n), this.shape[0]));
+        }
+        return new MyDataFrame(newData, this.header);
+    }
+
+    // TODO: 2018/12/1  ask what if the data is empty
+    public String dType(int index) {
+        if (this.shape[0] == 0) {
+            return "String";
+        }
+        String type = this.getData().get(index).get(0).getClass().getSimpleName();
+        for (int i = 1; i < this.shape[0]; i++) {
+            if (!this.getCell(i, index).getClass().getSimpleName().equals(type)) {
+                return "String";
+            }
+        }
+        return type;
+    }
+
+    // TODO: 2018/12/1 ask if the name is not in header
+    public String dType(String name) {
+        return this.dType(this.map.get(name));
+    }
+
+    public MyDataFrame slice(int index) {
+        List<List<Comparable>> newData = new ArrayList<>();
+        newData.add(this.data.get(index));
+        List<String> newHeader = new ArrayList<>();
+        newHeader.add(this.header.get(index));
+        return new MyDataFrame(newData, newHeader);
+    }
+
+    public MyDataFrame slice(String name) {
+        return this.slice(this.map.get(name));
+    }
+
+    public MyDataFrame slice(int[] indexArr) {
+        List<List<Comparable>> newData = new ArrayList<>();
+        for (int index : indexArr) {
+            newData.add(this.data.get(index));
+        }
+        List<String> newHeader = new ArrayList<>();
+        for (int index : indexArr) {
+            newHeader.add(this.header.get(index));
+        }
+        return new MyDataFrame(newData, newHeader);
+    }
+
+    public MyDataFrame slice(String[] nameArr) {
+        int[] indexArr = new int[nameArr.length];
+        for (int i = 0; i < nameArr.length; i++) {
+            indexArr[i] = this.map.get(nameArr[i]);
+        }
+        return this.slice(indexArr);
+    }
+
+
+    public MyDataFrame filter(String col, String op, Comparable o) {
+        List<List<Comparable>> newData = new ArrayList<>();
+        switch (op) {
+            case ">":
+                for (int j = 0; j < this.shape[1]; j++) {
+                    List<Comparable> newCol = new ArrayList<>();
+                    for (int i = 0; i < this.shape[0]; i++) {
+                        if ((int) this.getCell(i, col) > (int) o) {
+                            newCol.add(this.getCell(i, j));
+                        }
+                    }
+                    newData.add(newCol);
+                }
+                break;
+            case ">=":
+                for (int j = 0; j < this.shape[1]; j++) {
+                    List<Comparable> newCol = new ArrayList<>();
+                    for (int i = 0; i < this.shape[0]; i++) {
+                        if ((int) this.getCell(i, col) >= (int) o) {
+                            newCol.add(this.getCell(i, j));
+                        }
+                    }
+                    newData.add(newCol);
+                }
+                break;
+            case "<":
+                for (int j = 0; j < this.shape[1]; j++) {
+                    List<Comparable> newCol = new ArrayList<>();
+                    for (int i = 0; i < this.shape[0]; i++) {
+                        if ((int) this.getCell(i, col) < (int) o) {
+                            newCol.add(this.getCell(i, j));
+                        }
+                    }
+                    newData.add(newCol);
+                }
+                break;
+            case "<=":
+                for (int j = 0; j < this.shape[1]; j++) {
+                    List<Comparable> newCol = new ArrayList<>();
+                    for (int i = 0; i < this.shape[0]; i++) {
+                        if ((int) this.getCell(i, col) <= (int) o) {
+                            newCol.add(this.getCell(i, j));
+                        }
+                    }
+                    newData.add(newCol);
+                }
+                break;
+            case "=":
+                for (int j = 0; j < this.shape[1]; j++) {
+                    List<Comparable> newCol = new ArrayList<>();
+                    for (int i = 0; i < this.shape[0]; i++) {
+                        if (this.getCell(i, col).equals(o)) {
+                            newCol.add(this.getCell(i, j));
+                        }
+                    }
+                    newData.add(newCol);
+                }
+                break;
+            case "!=":
+                for (int j = 0; j < this.shape[1]; j++) {
+                    List<Comparable> newCol = new ArrayList<>();
+                    for (int i = 0; i < this.shape[0]; i++) {
+                        if (!this.getCell(i, col).equals(o)) {
+                            newCol.add(this.getCell(i, j));
+                        }
+                    }
+                    newData.add(newCol);
+                }
+                break;
+        }
+
+        return new MyDataFrame(newData, this.header);
+    }
+
+    public MyDataFrame loc (int index){
+        List<List<Comparable>> newData = new ArrayList<>();
+        for (int j=0; j < this.shape[1]; j++) {
+            List<Comparable> row = new ArrayList<>();
+            row.add(this.data.get(j).get(index));
+            newData.add(row);
+        }
+        return new MyDataFrame(newData, this.header);
+    }
+
+    public MyDataFrame loc (int from, int to){
+        List<List<Comparable>> newData = new ArrayList<>();
+        for (int j=0; j < this.shape[1]; j++) {
+            List<Comparable> row = new ArrayList<>();
+            for (int i = from; i < to; i++){
+                row.add(this.data.get(j).get(i));
+            }
+            newData.add(row);
+        }
+        return new MyDataFrame(newData, this.header);
+    }
+
+    public MyDataFrame sort(int n) {
+        List<List<Comparable>> newData = new ArrayList<>();
+        List<Comparable> sortKey = this.data.get(n);
+        ArrayIndexComparator comparator = new ArrayIndexComparator(sortKey);
+        for (int j = 0; j < this.shape[1]; j++) {
+            List<Comparable> column = this.data.get(j);
+            List<Comparable> sortedColumn = new ArrayList<>();
+            Integer[] indexes = comparator.createIndexArray();
+            Arrays.sort(indexes, comparator);
+            for (int i : indexes) {
+                sortedColumn.add(column.get(i));
+            }
+            newData.add(sortedColumn);
+        }
+        return new MyDataFrame(newData, this.header);
+    }
+
+    public MyDataFrame sort(String name) {
+        return this.sort(this.map.get(name));
+    }
+
+    public Object getMin(int index) {
+        return Collections.min(this.data.get(index));
+    }
+
+    public Object getMin(String name) {
+        return this.getMin(this.map.get(name));
+    }
+
+    public Object getMax(int index) {
+        return Collections.max(this.data.get(index));
+    }
+
+    public Object getMan(String name) {
+        return getMax(this.map.get(name));
+    }
+
+
+}

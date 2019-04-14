@@ -1,0 +1,137 @@
+package hw4;
+
+import java.util.Scanner;
+
+public class CurrencyConvertor {
+    @SuppressWarnings("serial")
+	static class BadNumberException extends Exception {
+        BadNumberException() {
+        }
+
+    }
+
+    @SuppressWarnings("serial")
+	static class MainMenuException extends Exception {
+        MainMenuException() {
+        }
+
+    }
+
+    public static void main(String[] args) {
+        float YentoUSD;
+        int UserSelection = 0;
+        int preset = 0;
+        boolean resetPrice = false;
+        YentoUSD = 1;
+        Scanner scanner = null;
+        try {
+            scanner = new Scanner(System.in);
+            boolean ReceivedRate = false;
+            while (true) {
+                try {
+                    if (preset == 0) {
+                        System.out.println(
+                                "What do you want to do today:\n"  + "Please select from the following four options\n" + "\n"
+                                		+ "1. Enter/Change a price for one dollar in Japanese Yen\n"
+                                        + "2. Convert from USD to Japanese Yen\n" + "3. Convert from Japanese Yen to USD\n"
+                                        + "4. Quit the Currency Convertor");
+                        UserSelection = scanner.nextInt();
+                    } else {
+                        UserSelection = preset;
+                    }
+                    if (UserSelection == 1) {
+                        System.out.println("What is the current price for one USD in Japanese Yen today?");
+                        YentoUSD = scanner.nextFloat();
+                        if (YentoUSD < 0) {
+                            throw new BadNumberException();
+                        } else {
+                            ReceivedRate = true;
+                            UserSelection = 0;
+                            preset = 0;
+                        }
+
+                    } else if (ReceivedRate) {
+                        if (UserSelection == 2 && !resetPrice) {
+                            System.out.println("How much USD do you want to convert?\n"
+                                    + "Enter 0 if you want to change the price for one USD in Japanese Yen today");
+                            float UserInput = scanner.nextFloat();
+                            if (UserInput == 0) {
+                                preset = 2;
+                                resetPrice = true;
+                            } else if (UserInput < 0) {
+                                throw new BadNumberException();
+                            } else {
+                                System.out.printf(" Yen : %.2f %n", UserInput * YentoUSD);
+                                UserSelection = 0;
+                                preset = 0;
+                            }
+                        } else if (UserSelection == 2 && resetPrice) {
+                            System.out.println("Enter a new price for one dollar in Japanese Yen");
+                            YentoUSD = scanner.nextFloat();
+                            if (YentoUSD < 0) {
+                                throw new BadNumberException();
+                            } else {
+                                preset = 2;
+                                resetPrice = false;
+                            }
+                        } else if (UserSelection == 3 && !resetPrice) {
+                            System.out.println("How much Yen do you want to convert?\n"
+                                    + "Enter 0 if you want to change the price for one USD in Japanese Yen today");
+                            float UserInput = scanner.nextFloat();
+                            if (UserInput == 0) {
+                                preset = 3;
+                                resetPrice = true;
+                            } else if (UserInput < 0) {
+                                throw new BadNumberException();
+                            } else {
+                                System.out.printf(" USD : %.2f %n", UserInput / YentoUSD);
+                                UserSelection = 0;
+                                preset = 0;
+                            }
+                        } else if (UserSelection == 3 && resetPrice) {
+                            System.out.println("Enter a new price for one dollar in Japanese Yen");
+                            YentoUSD = scanner.nextFloat();
+                            if (YentoUSD < 0) {
+                                throw new BadNumberException();
+                            } else {
+                                preset = 3;
+                                resetPrice = false;
+                            }
+
+                        } else if (UserSelection == 4) {
+                            System.out.println("End");
+                            break;
+                        } else {
+                            throw new MainMenuException();
+                        }
+                    } else if (UserSelection == 4) {
+                        System.out.println("End");
+                        break;
+                    } else if (UserSelection > 4 || UserSelection < 1) {
+                        throw new MainMenuException();
+                    } else {
+                        System.out.println("Please enter 1 to set a price for one USD in Japanese Yen !");
+                    }
+                } catch (BadNumberException e) {
+                    System.out.println("Warning: Bad Number!\n" + "Please try again!");
+                    preset = UserSelection;
+                } catch (MainMenuException e) {
+                    System.out.println("Warning: You have to select from 1 to 4!\n" + "Please try again!");
+                    UserSelection = 0;
+                } catch (Exception e) {
+                    System.out.println("Warning: This is not a valid entry!\n" + "Please try again!");
+                    preset = UserSelection;
+                    scanner.next();
+                }
+                continue;
+            }
+        } finally {
+        	// close the scanner
+            if (scanner != null) {
+                scanner.close();
+            }
+        }
+    }
+}
+
+

@@ -1,0 +1,79 @@
+package hw4;
+
+import java.util.Scanner;
+
+public class CurrencyConvertor {
+
+	public static void main(String[] args) {
+		Scanner scanner = null;
+		float YentoUSD;
+		int UserSelection;
+		YentoUSD = 1;
+		try {
+			scanner = new Scanner(System.in);
+			boolean ReceivedRate = false;
+			while (true) {
+				try {
+					System.out.println(
+							"What do you want to do today:\n" + "1. Enter/Change a price for one dollar in Japanese Yen\n"
+									+ "2. Convert from USD to Japanese Yen\n" + "3. Convert from Japanese Yen to USD\n"
+									+ "4. Quit the Currency Convertor");
+					UserSelection = scanner.nextInt();
+
+					if (UserSelection == 1) {
+						System.out.println("What is the current price for one USD in Japanese Yen today?");
+						YentoUSD = scanner.nextFloat();
+						ReceivedRate = true;
+					} else if (ReceivedRate == true) {
+						if (UserSelection == 2) {
+							System.out.println("How much USD do you want to convert?\n"
+									+ "Enter 000 if you want to change the price for one USD in Japanese Yen today");
+							float UserInput = scanner.nextFloat();
+							if (UserInput == 000) {
+								System.out.println("Enter a new price for one dollar in Japanese Yen");
+								YentoUSD = scanner.nextFloat();
+							} else {
+								//double USDamount = scanner.nextFloat();
+							    System.out.printf(" Yen : %.2f %n", UserInput * YentoUSD);
+							}
+						} else if (UserSelection == 3) {
+							System.out.println("How much Yen do you want to convert?\n"
+									+ "Enter 000 if you want to change the price for one USD in Japanese Yen today");
+							float UserInput = scanner.nextFloat();
+							if (UserInput == 000) {
+								System.out.println("Enter a new price for one dollar in Japanese Yen");
+								YentoUSD = scanner.nextFloat();
+							} else {
+								//double USDamount = scanner.nextFloat();
+							    System.out.printf(" Yen : %.2f %n", UserInput / YentoUSD);
+							}
+						} else if (UserSelection == 4) {
+							System.out.println("End");
+							break;
+						} else if (UserSelection > 4 || UserSelection < 1) {
+							System.out.println(
+									"Warning: This is not a valid entry!\n" + "Please try again!");
+						}
+					} else if (UserSelection == 4) {
+						System.out.println("End");
+						break;
+					} else if (UserSelection > 4 || UserSelection < 1) {
+						System.out.println("Warning: This is not a valid entry!\n" + "Please try again!");
+					} else {
+						System.out.println("Please enter 1 to set a price for one USD in Japanese Yen !");
+					}
+				} catch (Exception e) {
+					System.out.println("Warning: This is not a valid entry!\n" + "Please try again!");
+					scanner.next();
+				}
+				continue;
+			}
+		} finally {
+			if (scanner != null) {
+				scanner.close();
+			}
+		}
+	}
+}
+
+

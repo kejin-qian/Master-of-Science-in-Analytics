@@ -1,0 +1,18 @@
+package HW5;
+
+public abstract class Appointment {
+	
+	   private String Description;
+	   
+	   // Constructor
+	   public Appointment (String desc) {
+	      Description = desc;
+	   }
+	   
+	   @Override
+	   public String toString() {
+		      return "Appointment[ " + Description + " ]";
+		   }
+	  
+	   abstract boolean occursOn(int year, int month, int day);
+}

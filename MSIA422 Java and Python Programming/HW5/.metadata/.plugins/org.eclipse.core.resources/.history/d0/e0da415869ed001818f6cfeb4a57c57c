@@ -1,0 +1,335 @@
+package HW5;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Scanner;
+
+public class AppointmentManager {
+
+    private List<Appointment> database = new ArrayList<Appointment>();
+
+    // Instantiate an AppointmentManager
+    public AppointmentManager() {
+    }
+
+    public void addAppointment(Appointment a) {
+        this.database.add(a);
+    }
+
+    public List<Appointment> getDatabase() {
+        return database;
+    }
+
+    // TODO: 2018/11/18 Implement save to txt, review hw4 e3
+    public void saveAppointment(String address) throws IOException {
+        String pathname = address;
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathname));
+        for (int i = 0; i < database.size(); i++) {
+            bufferedWriter.write(database.get(i) + "\n");
+        }
+        bufferedWriter.close();
+    }
+
+    public void loadAppointment(String filepath) throws IOException {
+        File file = new File(filepath);
+        Scanner scanner = new Scanner(file);
+        String aptType;
+        while (scanner.hasNextLine()) {
+            String[] line = scanner.nextLine().split(" - ");
+            aptType = line[1];
+            Appointment apt;
+            if (aptType.equals("One Time")) {
+                apt = new OneTimeAppointment(line[0], line[2]);
+                this.addAppointment(apt);
+            } else if (aptType.equals("Daily")) {
+                String sdate = line[0].split(" to ")[0];
+                String edate = line[0].split(" to ")[1];
+                apt = new DailyAppointment(line[2], sdate, edate);
+                this.addAppointment(apt);
+            } else if (aptType.equals("Monthly")) {
+                String sdate = line[0].split(" to ")[0];
+                String edate = line[0].split(" to ")[1];
+                String day = sdate.split("/")[0];
+                String smonth = sdate.split("/")[1];
+                String syear = sdate.split("/")[2];
+                String emonth = edate.split("/")[1];
+                String eyear = edate.split("/")[2];
+                apt = new MonthlyAppointment(line[2],day, smonth, syear, emonth, eyear);
+                this.addAppointment(apt);
+            }
+
+        }scanner.close();
+    }
+
+    // TODO: 2018/11/18 print out all appointments on the input date, review hw4 e3.
+    // Use Appointment.occursOn(date)
+    public void listAppointment(int year, int month, int day) throws ParseException {
+        List<Appointment> occurson = new ArrayList<Appointment>();
+        for (int i = 0; i < database.size(); i++) {
+            if (database.get(i).occursOn(year, month, day) == true) {
+                occurson.add(database.get(i));
+            }
+        if (occurson.size() == 0) {
+        	System.out.println("There is no appointments booked for this date!/n");
+        
+        } else {
+        for (int j = 0; j < occurson.size(); j++) {
+            System.out.println(occurson.get(j));
+        }
+    }
+        }}
+
+    // check the given date in string is a valid date
+    public static boolean dateValid(String date) {
+        try {
+            DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+            df.setLenient(false);
+            df.parse(date);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
+    }
+
+    public static boolean dateOrder(String date1, String date2) throws ParseException {
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+        df.setLenient(false);
+        Date Date1 = df.parse(date1);
+        Date Date2 = df.parse(date2);
+        if (Date1.before(Date2) || Date1.equals(Date2)) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    @SuppressWarnings("serial")
+    static class MainMenuException extends Exception {
+        MainMenuException() {
+        }
+
+    }
+
+    @SuppressWarnings("serial")
+    static class InvalidDateException extends Exception {
+        InvalidDateException() {
+        }
+
+    }
+
+    @SuppressWarnings("serial")
+    static class BadTypeException extends Exception {
+        BadTypeException() {
+        }
+    }
+
+    @SuppressWarnings("serial")
+    static class DateOrderException extends Exception {
+        DateOrderException() {
+        }
+    }
+
+    // TODO: 2018/11/18 User Interface in Main
+    public static void main(String[] args) throws IOException, ParseException {
+        Scanner scanner = null;
+        int UserSelection = 0;
+        int preset = 0;
+        int typeEntered = 0;
+        String lastType = "";
+
+
+        // preset values for Daily
+        int sdateEntered = 0;
+        String lastSdate = "";
+
+
+        AppointmentManager am = new AppointmentManager();
+        try {
+            scanner = new Scanner(System.in);
+            while (true) {
+                try {
+                    if (preset == 0) {
+                        System.out.println("Welcome to the Appointment Book!\n"
+                                + "Please select from the following 5 options\n" + "\n" + "1. Add A New Appointment\n"
+                                + "2. Save All Appointments Into A Text File\n"
+                                + "3. Load Appointments From A Text File\n"
+                                + "4. Check Appointments Booked For A Specific Day\n" + "5. Quit the Appointment Book\n");
+                        // read the user input
+                        UserSelection = scanner.nextInt();
+
+                    } else {
+                        UserSelection = preset;
+                    }
+                    if (UserSelection == 1) {
+                        String AptType;
+                        if (typeEntered == 0) {
+                            System.out.println("Please Enter The Type Of Appointment (Enter OneTime/Daily/Monthly)");
+                            AptType = scanner.next();
+                            lastType = AptType;
+                            typeEntered = 1;
+                        } else {
+                            AptType = lastType;
+                        }
+                        if (AptType.equals("OneTime")) {
+                            String date;
+                            System.out.println("Please Enter the Date of Appointment in (MM/DD/YYYY)");
+                            date = scanner.next();
+                            if (!dateValid(date)) {
+                                throw new InvalidDateException();
+                            }
+
+                            System.out.println("Please Enter a Description For This Appointment");
+                            scanner.nextLine();
+                            String desc = scanner.nextLine();
+                            Appointment onetimeap = new OneTimeAppointment(desc, date);
+                            am.addAppointment(onetimeap);
+                            System.out.println("Appointment Booked!\n");
+                            typeEntered = 0;
+                            preset = 0;
+                        } else if (AptType.equals("Daily")) {
+                            String sdate;
+                            if (sdateEntered == 0) {
+                                System.out.println("Please Enter the Start Date of Appointment in (MM/DD/YYYY)");
+                                sdate = scanner.next();
+                                if (!dateValid(sdate)) {
+                                    throw new InvalidDateException();
+                                }
+                                lastSdate = sdate;
+                                sdateEntered = 1;
+                            } else {
+                                sdate = lastSdate;
+                            }
+                            String edate;
+                            System.out.println("Please Enter the End Date of Appointment in (MM/DD/YYYY)");
+                            edate = scanner.next();
+                            if (!dateValid(edate)) {
+                                throw new InvalidDateException();
+                            }
+                            if (!dateOrder(sdate, edate)) {
+                                throw new DateOrderException();
+                            }
+                            System.out.println("Please Enter a Description For This Appointment");
+                            scanner.nextLine();
+                            String desc = scanner.nextLine();
+                            Appointment dap = new DailyAppointment(desc, sdate, edate);
+                            am.addAppointment(dap);
+                            System.out.println("Appointment Booked!\n");
+                            sdateEntered = 0;
+                            typeEntered = 0;
+                            preset = 0;
+                        } else if (AptType.equals("Monthly")) {
+                            String userinput;
+                            System.out.println(
+                                    "Please Enter the Day(DD), Start Month(MM), Start Year(YYYY), End Month(MM), End Year(YYYY) and separated by comma, with no space.");
+                            scanner.nextLine();
+                            userinput = scanner.next();
+                            if (userinput.split(",").length != 5) {
+                                throw new InvalidDateException();
+                            }
+                            String day = userinput.split(",")[0];
+                            String smonth = userinput.split(",")[1];
+                            String syr = userinput.split(",")[2];
+                            String emonth = userinput.split(",")[3];
+                            String eyr = userinput.split(",")[4];
+                            String date1 = smonth + "/" + day + "/" + syr;
+                            if (!dateValid(date1)) {
+                                throw new InvalidDateException();
+                            }
+                            String date2 = emonth + "/" + day + "/" + eyr;
+                            if (!dateValid(date2)) {
+                                throw new InvalidDateException();
+                            }
+                            if (!dateOrder(date1, date2)) {
+                                throw new DateOrderException();
+                            }
+                            System.out.println("Please Enter a Description For This Appointment");
+                            scanner.nextLine();
+                            String desc = scanner.nextLine();
+                            Appointment map = new MonthlyAppointment(desc, day, smonth, syr, emonth, eyr);
+                            am.addAppointment(map);
+                            System.out.println("Appointment Booked!\n");
+                            UserSelection = 0;
+                            typeEntered = 0;
+                            preset = 0;
+                        } else {
+                            throw new BadTypeException();
+                        }
+                    } else if (UserSelection == 2) {
+                        System.out.println("Please Enter the Path That You Want the Text File To Be Saved.\n"
+                        		+ "Example: /Users/qiankejin/Desktop/MSiA/MSiA422/HW5/appointmentSave.txt");
+                        scanner.nextLine();
+                        String path = scanner.nextLine();
+                        am.saveAppointment(path);
+                        System.out.println("The text file has been successfully saved to " + path);
+                        preset = 0;
+
+                    } else if (UserSelection == 3) {
+                        System.out.println("Please Enter the Path Of The File.");
+                        scanner.nextLine();
+                        String path = scanner.nextLine();
+                        am.loadAppointment(path);
+                        System.out.println("The text file has been successfully loaded");
+                        preset = 0;
+
+                    } else if (UserSelection == 4) {
+                        System.out.println("Please enter a date that you want to check in (MM/DD/YYYY)");
+                        String date = scanner.next();
+                        if (!dateValid(date)) {
+                            throw new InvalidDateException();
+                        }
+                        int month = Integer.parseInt(date.split("/")[0]);
+                        int day = Integer.parseInt(date.split("/")[1]);
+                        int year = Integer.parseInt(date.split("/")[2]);
+                        am.listAppointment(year, month, day);
+                        preset = 0;
+
+                    } else if (UserSelection == 5) {
+                        System.out.println("End");
+                        break;
+                    } else if (UserSelection > 5 || UserSelection < 1) {
+                        throw new MainMenuException();
+                    }
+
+                } catch (MainMenuException e) {
+                    System.out.println("Warning: You have to select from 1 to 4!\n" + "Please try again!");
+                    UserSelection = 0;
+                } catch (InvalidDateException e) {
+                    System.out.println("Warning: Please enter a valid date(s)!");
+                    preset = UserSelection;
+                } catch (BadTypeException e) {
+                    System.out.println("Warning: Please enter a valid Appointment Type (OneTime/Daily/Monthly)!");
+                    preset = UserSelection;
+                    typeEntered = 0;
+                } catch (DateOrderException e) {
+                    System.out.println("Warning: Please check the order of start date and end date! ");
+                    preset = UserSelection;
+                    sdateEntered = 0;
+                } catch (FileNotFoundException e) {
+                    System.out.println("File Not Found! Please find the right path then Press C and Enter to continue.");
+                    preset = UserSelection;
+                    scanner.next();
+
+                } catch (Exception e) {
+                    System.out.println("Warning: This is not a valid entry!\n" + "Please try again!");
+                    preset = UserSelection;
+                    scanner.next();
+                }
+                continue;
+            }
+
+        } finally {
+            // close the scanner
+            if (scanner != null) {
+                scanner.close();
+            }
+        }
+
+    }
+
+}

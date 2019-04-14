@@ -1,0 +1,125 @@
+package HW5;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.Scanner;
+
+public class AppointmentManager {
+
+	private List<Appointment> database = new ArrayList<Appointment>();
+
+	// Instantiate an AppointmentManager
+	public AppointmentManager() {
+	}
+
+	public void addAppointment(Appointment a) {
+		this.database.add(a);
+	}
+
+	// TODO: 2018/11/18 Implement save to txt, review hw4 e3
+	public void saveAppointment() throws IOException {
+		String pathname = "/Users/qiankejin/Desktop/MSiA/MSiA422/HW5/appointments.txt";
+		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathname));
+		for (int i = 0; i < database.size(); i++) {
+			bufferedWriter.write(database.get(i) + "\n");
+		}
+		bufferedWriter.close();
+	}
+
+	// TODO: 2018/11/18 print out all appointments on the input date, review hw4 e3.
+	// Use Appointment.occursOn(date)
+	public void listAppointment(int year, int month, int day) throws ParseException {
+		List<Appointment> occurson = new ArrayList<Appointment>();
+		for (int i = 0; i < database.size(); i++) {
+			if (database.get(i).occursOn(year, month, day) == true) {
+				occurson.add(database.get(i));
+			}
+		}
+		for (int i = 0; i < occurson.size(); i++) {
+			System.out.println(occurson.get(i));
+		}
+	}
+
+	// TODO: 2018/11/18 User Interface in Main
+	public static void main(String[] args) throws IOException, ParseException {
+		Scanner scanner = null;
+		int UserSelection = 0;
+		AppointmentManager am = new AppointmentManager();
+		try {
+			scanner = new Scanner(System.in);
+			while (true) {
+				try {
+					System.out.println("Welcome to the Appointment Book!\n"
+							+ "Please select from the following four options\n" + "\n" + "1. Add A New Appointment\n"
+							+ "2. Save and Load All Appointments Into A Text File\n"
+							+ "3. Check Appointments Booked For A Specific Day\n" + "4. Quit the Appointment Book\n");
+					// read the user input
+					UserSelection = scanner.nextInt();
+					if (UserSelection == 1) {
+						System.out.println("Please Enter The Type Of Appointment (Enter OneTime/Daily/Monthly)");
+						String AptType = scanner.next();
+						System.out.println(AptType.equals("OneTime"));
+						if (AptType.equals("OneTime")) {
+							System.out.println("Please Enter the Date of Appointment in (MM/DD/YYYY)");
+							String date = scanner.next();
+							System.out.println("Please Enter a Description For This Appointment");
+							String desc = scanner.next();
+							Appointment onetimeap = new OneTimeAppointment(desc, date);
+							am.addAppointment(onetimeap);
+						} else if (AptType.equals("Daily")) {
+							System.out.println("Please Enter the Start Date of Appointment in (MM/DD/YYYY)");
+							String sdate = scanner.next();
+							System.out.println("Please Enter the End Date of Appointment in (MM/DD/YYYY)");
+							String edate = scanner.next();
+							System.out.println("Please Enter a Description For This Appointment");
+							String desc = scanner.next();
+							Appointment dap = new DailyAppointment(desc, sdate, edate);
+							am.addAppointment(dap);
+						} else if (AptType.equals("Monthly")) {
+							System.out.println(
+									"Please Enter the Day(DD), Start Month(MM), Start Year(YYYY), End Month(MM), End Year(YYYY) and separated by comma.");
+							String userinput = scanner.next();
+							String day = userinput.split(",")[0];
+							String smonth = userinput.split(",")[1];
+							String syr = userinput.split(",")[2];
+							String emonth = userinput.split(",")[3];
+							String eyr = userinput.split(",")[4];
+							System.out.println("Please Enter a Description For This Appointment");
+							String desc = scanner.next();
+							Appointment map = new MonthlyAppointment(desc, day, smonth, syr, emonth, eyr);
+							am.addAppointment(map);
+						}
+						System.out.println("Appointment Booked!");
+
+					}
+
+					else if (UserSelection == 2) {
+
+					} else if (UserSelection == 4) {
+						System.out.println("End");
+						break;
+					}
+
+				} catch (Exception e) {
+					System.out.println("Warning: This is not a valid entry!\n" + "Please try again!");
+					scanner.next();
+				}
+				continue;
+			}
+
+		} finally {
+			// close the scanner
+			if (scanner != null) {
+				scanner.close();
+			}
+		}
+
+		am.saveAppointment();
+
+	}
+
+}

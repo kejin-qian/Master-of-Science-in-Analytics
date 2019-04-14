@@ -1,0 +1,58 @@
+package HW5;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class AppointmentManager {
+
+    private List<Appointment> database = new ArrayList<Appointment>();
+
+    // Instantiate an AppointmentManager
+    public AppointmentManager (){
+    }
+
+    public void addAppointment (Appointment a) {
+        this.database.add(a);
+    }
+
+    // TODO: 2018/11/18 Implement save to txt, review hw4 e3
+    public void saveAppointment () throws IOException {
+	    String pathname = "/Users/qiankejin/Desktop/MSiA/MSiA422/HW5/appointments.txt"; 
+	    BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(pathname));
+	    for (int i = 0; i < database.size(); i++) {
+	        bufferedWriter.write(database.get(i)+"\n"); 
+	    }
+	    bufferedWriter.close();
+    }
+
+    // TODO: 2018/11/18 print out all appointments on the input date, review hw4 e3. Use Appointment.occursOn(date)
+    public String listAppointment (int year, int month, int day){
+        return "";
+    }
+
+    // TODO: 2018/11/18 Optional toString, help visualizing database
+    public String toString (){
+        return "";
+    }
+
+
+    // TODO: 2018/11/18 User Interface in Main 
+    public static void main(String[] args) throws IOException {
+
+        AppointmentManager am = new AppointmentManager();
+        Appointment ap1 = new OneTimeAppointment("wahaha", "07/31/1994");
+        am.addAppointment(ap1);
+        Appointment ap2 = new DailyAppointment("houhouha", "06/16/1996", "11/18/2018");
+        am.addAppointment(ap2);
+        Appointment ap3 = new MonthlyAppointment("guagaugua", "16", "4", "1980", "9", "2008");
+        am.addAppointment(ap3);
+        am.saveAppointment();
+
+
+    }
+
+
+}
