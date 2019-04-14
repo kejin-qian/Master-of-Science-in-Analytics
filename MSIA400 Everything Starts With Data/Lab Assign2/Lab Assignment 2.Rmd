@@ -1,0 +1,254 @@
+---
+title: "LabAssignment2"
+author: "Kejin Qian"
+date: "11/12/2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## import redwine.txt
+
+```{r}
+redwine = read.table('redwine.txt', header=T);
+```
+
+## problem 1
+
+Recall that RS and SD have missing values. Calculate the averages of RS and SD by ignoring the missing values.
+
+```{r}
+avgRS <- mean(redwine$RS, na.rm = T)
+print(paste('the average of RS by ignoring the missing values is', avgRS))
+avgSD <- mean(redwine$SD, na.rm = T)
+print(paste('the average of SD by ignoring the missing values is', avgSD))
+```
+
+Answer: 
+
+* The average of RS by ignoring the missing values is 2.53795180722892
+
+* The average of SD by ignoring the missing values is 46.2983565107459
+
+-----------------------------------------------------------------------------------------------
+
+## problem 2
+
+After correlation analysis, Mr. Klabjan observed that there exists a significant correlation between SD and FS. Create vectors of SD.obs and FS.obs by omitting observations with missing values in SD. Build (simple) linear regression model to estimate SD.obs using FS.obs. That is, SD.obs is used as response variable and FS.obs is used as explanatory variable for the regression analysis. Print out the coefficients of the regression
+model.
+Hint: If you save the output from lm function to ABC, then the coefficients of the regression model can be obtained by coefficients(ABC).
+
+```{r}
+SDFS <- cbind(redwine$SD, redwine$FS)
+SDFS.omit <- na.omit(SDFS)
+colnames(SDFS.omit) <- c('SD','FS')
+#vector of SD.obs by omitting missing values
+SD_omit <- SDFS.omit[,1]
+#vector of FS.obs by omitting missing values in SD
+FS_omit <- SDFS.omit[,2]
+model1 <- lm(SD_omit ~ FS_omit)
+summary(model1)
+coefficients(model1)
+```
+
+From the above regression model summary output and coefficients output, we get intercept = 13.185505 and  slope =  2.086077.
+
+-----------------------------------------------------------------------------------------------
+
+## problem 3
+
+Create a vector (of length 17) of estimated SD values using the regression model in Problem 2 and FS values of the observations with missing SD values. Impute missing values of SD using the created vector. Print out the average of SD after the imputation.
+
+```{r}
+FS_omit = redwine$FS[is.na(redwine$SD)]
+pred <- predict(model1, data.frame(FS_omit))
+#Create a vector of estimated SD values using model1 and FS values of the observations with missing SD values.
+pred_vector <- as.vector(pred)
+pred_vector
+redwine$SD[is.na(redwine$SD)] <- pred_vector
+avgSDnew <- mean(redwine$SD)
+print(paste('the average of SD is', avgSDnew))
+```
+
+Answer: 
+The created vector of estimated SD values using the regression model in Problem 2 and FS values of the observations with missing SD values is printed in the output above.
+
+The average of SD after the imputation is 46.3018196746507.
+
+-----------------------------------------------------------------------------------------------
+
+## problem 4
+
+Mr. Klabjan decided RS is not significantly correlated to other attributes. Impute missing values of RS using the average value imputation method from the lab. Print out the average of RS after the imputation.
+
+```{r}
+avg.imp <- function (a, avg){
+        missing <- is.na(a)
+        imputed <- a
+        imputed[missing] <- avg
+        return (imputed)
+   }
+```
+
+```{r}
+redwine$RS = avg.imp(redwine$RS, avgRS)
+avgRSnew <- mean(redwine$RS)
+print(paste('the average of RS is', avgRSnew))
+```
+
+Answer: 
+
+The average of RS after the imputation is 2.53795180722892.
+
+-----------------------------------------------------------------------------------------------
+
+## problem 5
+
+We have imputed all missing values in the data set. Build multiple linear regression model for the new dataset and save it as winemodel. Print out the coefficients of the regression model.
+Hint 1 : built multiple linear regression by winemodel=lm(redwine$QA*redwine$FA+...+redwine$AL)
+
+```{r}
+winemodel <- lm(QA ~ ., data = redwine)
+coefficients(winemodel)
+```
+
+Answer:
+*(Intercept) 47.202815335
+
+*FA          0.068406796
+
+*VA         -1.097686420 
+
+*CA         -0.178949797 
+
+*RS          0.025926958
+
+*CH         -1.631290466 
+
+*FS          0.003530106 
+
+*SD         -0.002854970
+
+*DE         -44.816652166
+
+*PH          0.035996993 
+
+*SU          0.944871182
+
+*AL          0.247046550 
+
+-----------------------------------------------------------------------------------------------
+
+## problem 6
+
+Print out the summary of the model. Pick one attribute that is least likely to be related to QA based on p-values.
+
+```{r}
+summary(winemodel)
+```
+
+PH has the highest p-value(0.414413) among all the predictors. So PH is least likely to be related to QA based on p-values.
+
+-----------------------------------------------------------------------------------------------
+
+## problem 7
+
+Perform 5-fold cross validation for the model you just built. Print out the average error rate.
+
+```{r}
+CVInd <- function(n,K) {
+  m<-floor(n/K)
+  r<- n-m*K
+  I<-sample(n,n)
+  Ind<-list()
+  length(Ind)<-K
+  for (k in 1:K) {
+    if (k <= r) kpart <- ((m+1)*(k-1)+1):((m+1)*k)           
+    else kpart<-((m+1)*r+m*(k-r-1)+1):((m+1)*r+m*(k-r))  
+    Ind[[k]] <- I[kpart]}
+  Ind
+  }
+```
+
+```{r}
+# Repeat the 5-fold cross validation 20 times and take the average of SSE
+Nrep <- 20
+K <- 5
+n <- nrow(redwine)
+y <- redwine$QA
+SSE <- matrix(0,Nrep,1)
+```
+
+```{r}
+for (j in 1:Nrep) {
+  Ind <- CVInd(n,5)
+  yhat <- y
+  for (k in 1:K) {
+    out <- lm(QA~.,redwine[-Ind[[k]],])
+    yhat[as.vector(Ind[[k]])] <- predict(out,redwine[Ind[[k]],-1])
+  }
+  SSE[j,]=sum((y-yhat)^2)
+}
+mean(SSE)
+print(paste("the average error rate (SSE) is", mean(SSE)))
+```
+
+The average error rate (SSE) is printed above.
+
+-----------------------------------------------------------------------------------------------
+
+## problem 8
+
+Mr. Klabjan is informed that the attribute picked in Problem 6 actually contains outliers. Calculate the average $\mu$ and standard deviation $\sigma$ of the selected attribute. Create a new data set after removing observations that is outside of the range [$\mu$+3$\sigma$; $\mu$+3$\sigma$] and name the data set as redwine2. Print out the dimension of redwine2 to know how many observations are removed.
+
+```{r}
+PHmean <- mean(redwine$PH)
+PHstd <- sd(redwine$PH)
+PHupper <- PHmean + 3 * PHstd
+PHlower <- PHmean - 3 * PHstd
+redwine2 <-subset(redwine, PH<PHupper & PH>PHlower)
+dim(redwine)
+dim(redwine2)
+```
+
+Before removing the outliers, we have 1599 observations in redwine dataset. After removing observations that is outside of the range [$\mu$+3$\sigma$; $\mu$+3$\sigma$], our dataset redwine2 has 1580 features. So 19 features were removed.
+
+-----------------------------------------------------------------------------------------------
+
+## problem 9
+
+Build regression model winemodel2 using the new data set from Problem 8 and print out the summary. Compare this model with the model obtained in Problem 6 and decide which one is better. Pick 5 attributes that is most likely to be related to QA based on p-values.
+
+```{r}
+winemodel2 <- lm(QA ~ ., data = redwine2)
+coefficients(winemodel2)
+summary(winemodel2)
+```
+
+1. In problem 6, the model we fit has $R^2_{adj}$ = 0.354. After removing outliers from PH, we get a higher $R^2_{adj}$ = 0.3585 from the new fitted model. 
+
+2. The models from problem 6 and problem 9 both have 7 predictors which have statistically significant coefficients at significance level of 0.05.
+
+3. In problem 6, the model we fit has overall F-statistic = 80.6 (p-value < 2.2e-16) while in problem 9, the overall F-statistic is 81.21 (p-value < 2.2e-16) which is slightly higher. 
+
+So based on the above three comparisons, I think the model from Problem 9 is better than the model from Problem 6 because it has a higher $R^2_{adj}$ and more significant overall F-statistic. 
+
+Pick 5 attributes that is most likely to be related to QA based on p-values:
+
+1. VA  (p-value < 2e-16)
+
+2. AL  (p-value < 2e-16)
+
+3. SU  (p-value < 3.46e-15)
+
+4. CH  (p-value < 6.60e-06)
+
+5. SD  (p-value < 2.16e-05)
+
+-----------------------------------------------------------------------------------------------
+
+

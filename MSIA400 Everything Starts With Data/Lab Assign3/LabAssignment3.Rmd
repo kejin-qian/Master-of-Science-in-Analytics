@@ -1,0 +1,127 @@
+---
+title: "Lab Assignment 3"
+author: "Kejin Qian"
+date: "11/30/2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Problem 1
+Short answers: Please answer the following questions in a few sentences.
+Based on our labs,
+
+a. What is the purpose of doing Markov Chain Monte Carlo (MCMC)?
+
+We know that one big problem in Monte Carlo methods is in obtaining sample points from complex distributions p(x). MCMC can solve this problem and accomplish the goal of sampling points from distribution p(.) that is difficult to sample from directly by constructing a Markov Chain whose stationary distribution is exactly equal to our targetdistribution p(.).
+
+------------------------------------------------------------------------------------------------
+
+b. What is the difference between the Metropolis Algorithm and the Metropolis Hastings Algorithm?
+
+Metropolis Algorithm is a special case of Metropolis Hastings Algorithm. Metropolis Algorithm requires the proposal distribution q(.|.) to be symmetric where q($\theta_{1}$|$\theta_{2}$) = q($\theta_{2}$|$\theta_{1}$). Metropolis Hastings Algorithm is a generalization of the Metropolis Algorithm, and for MHA, q(.|.) does not have to be symmetric.
+
+------------------------------------------------------------------------------------------------
+
+c. What is the purpose of Ridge regression? What is the purpose of LASSO regression?
+
+The general OLS sometimes will have problems like too many predictors (fitting full model without penalization will result in large prediction intervals, and LS regression estimator may not uniquely exist.), multicollinearity(LS estimates are unbiased, but their variances are large so they may be far from the true value.) and ill-conditioned $(X'X)^{-1}$(LS estimates depend upon $(X'X)^{-1}$, we would have problems in computing beta_LS if X'X were singular or nearly singular). 
+
+We can use lasso and ridge regressions to solve the above problems. 
+
+1. Lasso: 
+
+Minimizes SSE subject to  $\lambda$* $\sum$|$\beta_{j}$|  <= s
+
+Lasso regression performs both variable selection and regularization. It is able to solve the above problems by forcing the sum of the absolute value of the regression coefficients to be less than a fixed value, which forces certain coefficients to be exactly set to zero, effectively choosing a simpler model that does not include those coefficients.
+
+2. Ridge
+
+Minimizes SSE subject to  $\lambda$ * $\sum$$\beta_{j}^{2}$  <= s
+
+Ridge regression performs regularization. As $\lambda$ increases, the sum of the squares of the coefficients is forced to be less than a fixed value, but this only shrinks the size of the coefficients towards zero. Ridge regression does not set any of the coefficients to exactly zero, so different from Lasso, Ridge regression can not do variable selection. 
+
+------------------------------------------------------------------------------------------------
+
+d. State the IIA assumption for Multinomial Logit discrete choice model.
+
+Independence of irrelevant alternatives (IIA): the ratio of the probabilities of choosing two alternatives is independent of the presence or attributes of any other alternative.
+
+------------------------------------------------------------------------------------------------
+
+## Problem 2
+The gas_mileage.csv data set contains the response Mpg (Miles per gallon) and 11 predictors such as Displacement, Horsepower, Torque, etc. for 32 cars.
+
+### Load Data
+```{r}
+gas_mileage <- read.csv("gas_mileage.csv")
+```
+
+a. Fit quantile regression models for the 0.05, 0.10, 0.15, …, 0.90, 0.95th conditional quantiles for Mpg regressed on all the predictors using the quantreg package in R.
+```{r}
+library(quantreg)
+seq = seq(0.05, 0.95, 0.05)
+rfit <- rq(Mpg ~ ., tau = seq, data = gas_mileage)
+summary(rfit)
+```
+
+b. Plot the results using the plot function.
+```{r}
+plot(rfit, mfrow=c(1,2))
+```
+
+c. Interpret the results for 3 predictors of your choice.
+
+1. Carb_barrels: From the plot of Carb_barrels, we can see that the magnitudes of effects of Carb_barrels had a general decreasing trend over quantiles. From the plot, we can see that the OLS coefficient for Carb_barrels is around 0.3, and between 0 quantile and about 0.675 quantile of Carb_barrels, the magnitude of the positive effect of Carb_barrels at each quantile are considerably higher than the OLS coefficient. And after about 0.675 quantile, the coefficients dropped below the OLS conefficients and were fluctuating around 0. Also at 0.7 and 0.75 quantiles, the magnitudes of effects of Carb_barrels to Mpg became negative. So we can conclude that generally, the lower the Carb_barrels, the larger the positive effects to Mpg. 
+
+2. Displacement: From the plot of Displacement, we can see that at all the quantiles, the magnitudes of effects of Displacement on Mpg are negative. Also, similar to Car_barrels, we can see a general decreasing trend over quantiles. Between 0 quantile and 0.35 quantile, the magnitudes of effects of Displacement at each quantile are above the OLS coefficient(around -0.075). And start from around 0.4 quantile of Displacement, the magnitudes of the effects of Displacement started to drop below the OLS coefficients with small fluctuations. And it dropped to around -0.175 at 100% quantile. 
+
+3. Rear_axle_ratio: From the plot of Rear_axle_ratio, we can see that at all the quantiles, the magnitudes of effects of Rear_axle_ratio are positive. And the OLS coefficient of predictor Real_axle_ratio is about 5.8. Between 0 quantile and 0.35 quantile of Rear_axle_ratio, the magnitudes of effects of Rear_axle_ratio at each quantile are below the OLS coefficient. Specifically, for 0, 0.5, 0.1 quantiles, the magnitudes of effects are actually constant at 3.866260. Then it dropped a little bit at 0.2 and 0.25 quantile but increased again at 0.3 quantile. Between 0.4 and 0.6 quantile, we can see that the magnitudes of effect of Rear_axle_ratio are considerably higher compared to the OLS coefficient. But it dropped below OLS coefficient again starting from 0.65 quantile. Although the effects of Rear_axle_ratio increased a little bit in the next two quantile intervals, but they were still below the OLS coefficents. And starting from 0.8 quantile, the magnitudes of effects sharply decreased to around 2.
+
+-------------------------------------------------------------------------------------------------
+
+d. Report the summary for the conditional median (0.50th conditional quantile) using the bootstrap method for computing standard errors of regression coefficients.
+```{r}
+rfit1 <- rq(Mpg ~ ., tau = .5, data = gas_mileage)
+summary(rfit1, se = "boot")
+```
+
+## Problem 3
+The car.csv data contains the response y = 0,1 (whether a family purchases a new car, yes = 1, no = 0) and 2 predictors: family income and age of car.
+
+### Load Data
+```{r}
+car <- read.csv("car.csv")
+```
+
+a. Fit a support vector machine to predict the response using default setting for kernels and hyper-parameters in the svm function in e1071 package.
+```{r}
+library(e1071)
+svm = svm(factor(y) ~ ., data = car)
+summary(svm)
+```
+
+b. Plot the result using the plot function.
+```{r}
+plot(svm, car, income~car_age)
+```
+
+c. Predict the response for a family with income = 50, car age = 5.
+```{r}
+newdata <- data.frame(income = 50, car_age = 5)
+newdata
+```
+
+```{r}
+newdata$pred <- predict(svm, newdata = newdata, type = "response")
+newdata
+```
+The predicted response for a family with income = 50, car age = 5 is 1(purchases a new car).
+
+
+
+
